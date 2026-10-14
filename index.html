@@ -11,7 +11,6 @@
 <section id="tab-entry" class="card"><h2>Týždenný výkaz</h2><p class="sub">Pondelok až nedeľa – práca a cesta.</p><div class="field"><label>Dátum v týždni</label><input id="weekDate" type="date"></div><div class="field"><label>Zákazka / pracovisko</label><input id="job" placeholder="Napr. MIBRAG"></div><div class="field"><label>Firma (nepovinné)</label><input id="company" placeholder="Názov firmy"></div><div class="small">Deň a dátum / hodiny práce / hodiny cesty</div><div id="days"></div><div class="totals"><span>Práca spolu</span><span id="workTotal">0 h</span></div><div class="totals"><span>Cesta spolu</span><span id="travelTotal">0 h</span></div><button id="save" class="full">Uložiť týždenný výkaz</button><button id="cancelEdit" class="secondary full hidden" style="margin-top:8px">Zrušiť úpravu</button></section>
 <section id="tab-mine" class="card hidden"><h2>Moje výkazy</h2><div id="mineList"></div></section><section id="tab-workers" class="card hidden"><h2>Schválenie pracovníkov</h2><div id="workersList"></div></section><section id="tab-reports" class="card hidden"><h2>Výkazy pracovníkov</h2><div id="reportsList"></div></section></div></section><div class="footer">MiNi Technik · online evidencia pracovného času</div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
-'use strict';
 const URL='https://jmirxaqvsiabmexznmxx.supabase.co';
 const KEY='sb_publishable_XlwNxKly9NG9dYxylSHRjg_PfprPI8v';
 const $=id=>document.getElementById(id);
