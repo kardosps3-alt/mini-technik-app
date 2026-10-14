@@ -1,186 +1,39 @@
-<!DOCTYPE html>
-<html lang="sk">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#171717">
-<title>MiNi Technik – pracovné výkazy</title>
+<!doctype html>
+<html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171717"><title>MiNi Technik – pracovné výkazy</title>
 <style>
-:root{--bg:#f2f3f5;--card:#fff;--ink:#191919;--muted:#666;--line:#ddd;--orange:#ff8500;--green:#16794a;--red:#a32929}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:#171717;color:#fff;padding:18px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:11px}.mark{height:42px;width:42px;border:2px solid var(--orange);border-radius:10px;display:grid;place-items:center;color:var(--orange);font-weight:900}
-h1{font-size:20px;margin:0}header p{margin:2px 0 0;color:#ddd;font-size:12px}.who{font-size:12px;color:#ddd}
-main{max-width:760px;margin:auto;padding:18px 13px 40px}.card{background:var(--card);border-radius:16px;padding:19px;margin:0 0 15px;box-shadow:0 3px 14px #00000008}
-h2{font-size:21px;margin:0 0 7px}h3{font-size:17px;margin:0 0 13px}.sub,.muted,.note{color:var(--muted)}.sub{margin:0 0 17px}
-.field{margin:0 0 13px}.field label{display:block;font-weight:650;font-size:14px;margin-bottom:6px}
-input,textarea,select,button{font:inherit}input,textarea,select{width:100%;min-width:0;padding:12px;border:1px solid #cbd0d6;border-radius:10px;background:#fff;color:#171717}
-button{border:0;border-radius:10px;padding:12px 15px;background:var(--orange);color:#171717;font-weight:750;cursor:pointer}button.secondary{background:#f0f1f2;border:1px solid #d5d7da;color:#222}button.danger{background:#fce8e8;color:var(--red)}button:disabled{opacity:.55;cursor:not-allowed}.full{width:100%}
-.row{display:flex;gap:9px;flex-wrap:wrap}.row>*{flex:1}.hidden{display:none!important}.message{padding:11px 12px;border-radius:10px;background:#fff4df;margin:12px 0;font-size:14px}.message.good{background:#e6f6ec;color:#165b35}.message.bad{background:#fdeaea;color:#8d2222}
-.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.tabs button{flex:1;min-width:110px}.tabs button.active{background:#171717;color:#fff}
-.dayrow{display:grid;grid-template-columns:42px minmax(0,1fr) minmax(0,1fr);gap:7px;align-items:center;margin:8px 0}.dayrow .day{font-weight:750}.dayrow input{padding:9px 4px;text-align:center;min-width:0}.smalllabel{font-size:11px;color:var(--muted);margin:0 0 4px}
-.total{display:flex;justify-content:space-between;gap:10px;background:#f4f4f4;border-radius:10px;padding:11px;margin:12px 0;font-weight:750}
-.entry{border:1px solid var(--line);border-radius:11px;padding:12px;margin:9px 0}.entry strong{display:block}.entry p{font-size:13px;color:var(--muted);margin:4px 0}.status{display:inline-block;border-radius:30px;padding:4px 8px;background:#fff0cf;color:#785000;font-size:12px;font-weight:700}.status.ok{background:#dff5e7;color:#17613a}.status.bad{background:#fde6e6;color:#8b2525}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid var(--line);padding:8px 5px;font-size:13px;vertical-align:top}.tablewrap{overflow-x:auto}
-.note{font-size:12px}.footer{text-align:center;color:#777;font-size:12px;padding:10px}
-@media(max-width:380px){.card{padding:14px}.dayrow{grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:5px}.dayrow input{font-size:14px}}
-</style>
-</head>
-<body>
-<header><div class="brand"><div class="mark">MT</div><div><h1>MiNi Technik</h1><p>EVIDENCIA PRACOVNÉHO ČASU</p></div></div><div id="sessionInfo" class="who">Neprihlásený</div></header>
-<main>
-<section id="authScreen">
- <div class="card">
-  <h2>Prihlásenie</h2><p class="sub">Prihlás sa do svojho pracovného účtu.</p>
-  <div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="meno@firma.sk"></div>
-  <div class="field"><label for="loginPassword">Heslo</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Zadaj heslo"></div>
-  <button id="loginBtn" class="full">Prihlásiť sa</button>
-  <p class="note">Ak sa účet ešte nepotvrdil e-mailom, skontroluj svoju e-mailovú schránku.</p>
- </div>
- <div class="card">
-  <h2>Registrácia pracovníka</h2><p class="sub">Nové účty zostanú čakajúce na schválenie konateľom.</p>
-  <div class="field"><label for="regName">Meno a priezvisko</label><input id="regName" autocomplete="name" placeholder="Meno pracovníka"></div>
-  <div class="field"><label for="regEmail">E-mail</label><input id="regEmail" type="email" autocomplete="email" placeholder="meno@firma.sk"></div>
-  <div class="field"><label for="regPassword">Heslo (aspoň 6 znakov)</label><input id="regPassword" type="password" autocomplete="new-password" placeholder="Vytvor heslo"></div>
-  <button id="registerBtn" class="full">Požiadať o registráciu</button>
- </div>
-</section>
-<section id="appScreen" class="hidden">
- <div class="card">
-  <div class="row" style="align-items:center"><div><h2 id="welcome">Moja evidencia</h2><p id="approvalInfo" class="sub" style="margin:4px 0 0"></p></div><button id="logoutBtn" class="secondary">Odhlásiť sa</button></div>
-  <div id="globalMessage" class="message hidden"></div>
- </div>
- <div id="pendingScreen" class="card hidden"><h2>Čaká sa na schválenie</h2><p>Registrácia je uložená. Počkaj, kým konateľ schváli tvoj účet. Zatiaľ nemôžeš odosielať pracovné výkazy.</p><button id="refreshApproval" class="secondary">Skontrolovať schválenie</button></div>
- <div id="workerApp" class="hidden">
-  <div class="tabs"><button class="active" data-tab="entry">Zadať hodiny</button><button data-tab="mine">Moje výkazy</button><button id="adminTab" data-tab="admin" class="hidden">Správa pracovníkov</button></div>
-  <section id="tab-entry" class="card">
-   <h2>Týždenný výkaz hodín</h2><p class="sub">Zadaj hodiny za každý deň od pondelka do nedele.</p>
-   <div class="field"><label for="weekDate">Dátum v danom týždni</label><input id="weekDate" type="date"></div>
-   <div class="field"><label for="site">Zákazka / pracovisko</label><input id="site" placeholder="Napr. MIBRAG, Nemecko"></div>
-   <div class="field"><label for="note">Poznámka (nepovinné)</label><textarea id="note" rows="2" placeholder="Poznámka k výkazu"></textarea></div>
-   <div class="smalllabel">Hodiny v práci / hodiny na ceste</div>
-   <div id="days"></div>
-   <div class="total"><span>Spolu v práci</span><span id="workTotal">0 h</span></div><div class="total"><span>Spolu na ceste</span><span id="travelTotal">0 h</span></div>
-   <button id="submitTimesheet" class="full">Odoslať týždenný výkaz</button>
-   <p class="note">Hodiny sa ukladajú do online databázy až po úspešnom pripojení k správnej štruktúre tabuľky.</p>
-  </section>
-  <section id="tab-mine" class="card hidden"><h2>Moje výkazy</h2><div id="myEntries"></div></section>
-  <section id="tab-admin" class="card hidden"><h2>Schválenie pracovníkov</h2><p class="sub">Schvaľuj len ľudí, ktorých poznáš a ktorí majú pracovať pre firmu.</p><div id="workersList"></div></section>
- </div>
-</section>
-<div id="toast" class="message hidden" role="status"></div>
-<div class="footer">MiNi Technik · online evidencia pracovného času</div>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+:root{--orange:#ff8500;--bg:#f2f3f5;--ink:#191919}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,Arial,sans-serif}header{background:#171717;color:#fff;padding:18px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{display:flex;gap:11px;align-items:center}.mark{width:44px;height:44px;border:2px solid var(--orange);border-radius:11px;color:var(--orange);display:grid;place-items:center;font-weight:900}h1{font-size:21px;margin:0}header small{color:#ddd}.who{font-size:12px;max-width:35%;overflow-wrap:anywhere}main{max-width:760px;margin:auto;padding:17px 12px 35px}.card{background:#fff;border-radius:17px;padding:19px;margin-bottom:15px;box-shadow:0 3px 14px #00000008}h2{font-size:21px;margin:0 0 8px}p.sub{color:#666;margin:0 0 17px}.field{margin-bottom:14px}.field label{display:block;font-size:14px;font-weight:700;margin-bottom:6px}input,textarea,button{font:inherit}input,textarea{width:100%;min-width:0;padding:12px;border:1px solid #cbd0d6;border-radius:10px;background:white}button{border:0;border-radius:10px;background:var(--orange);color:#171717;font-weight:750;padding:12px 14px;cursor:pointer}button:disabled{opacity:.55}.full{width:100%}.secondary{background:#eee}.hidden{display:none!important}.message{padding:12px;border-radius:10px;margin:12px 0;background:#fff1d5;overflow-wrap:anywhere}.bad{background:#fde9e9;color:#8c2525}.good{background:#e5f5eb;color:#165b35}.note{font-size:12px;color:#666}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.tabs button{flex:1;min-width:105px}.tabs .active{background:#171717;color:white}.dayrow{display:grid;grid-template-columns:49px minmax(0,1fr) minmax(0,1fr);gap:7px;align-items:center;margin:9px 0}.dayrow input{text-align:center;padding:9px 2px}.small{font-size:11px;color:#666}.total{display:flex;justify-content:space-between;background:#f3f3f3;border-radius:9px;padding:11px;margin:9px 0;font-weight:700}.entry{border:1px solid #ddd;border-radius:10px;padding:12px;margin:9px 0;overflow-wrap:anywhere}.entry p{font-size:13px;color:#555}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.footer{text-align:center;color:#777;font-size:12px}#startup{font-size:13px}
+</style></head><body>
+<header><div class="brand"><div class="mark">MT</div><div><h1>MiNi Technik</h1><small>EVIDENCIA PRACOVNÉHO ČASU</small></div></div><div id="sessionInfo" class="who">Neprihlásený</div></header>
+<main><div id="startup" class="message">Pripájam sa k databáze…</div>
+<section id="authScreen"><div class="card"><h2>Prihlásenie</h2><p class="sub">Prihlás sa do svojho pracovného účtu.</p><div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="meno@firma.sk"></div><div class="field"><label for="loginPassword">Heslo</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Zadaj heslo"></div><button id="loginBtn" class="full">Prihlásiť sa</button><div id="loginMessage" class="message hidden" role="status"></div><p class="note">Ak je vyžadované potvrdenie e-mailu, skontroluj svoju e-mailovú schránku.</p></div>
+<div class="card"><h2>Registrácia pracovníka</h2><p class="sub">Nový pracovník čaká na schválenie konateľom.</p><div class="field"><label for="regName">Meno a priezvisko</label><input id="regName" autocomplete="name" placeholder="Meno pracovníka"></div><div class="field"><label for="regEmail">E-mail</label><input id="regEmail" type="email" autocomplete="email" placeholder="meno@firma.sk"></div><div class="field"><label for="regPassword">Heslo (aspoň 6 znakov)</label><input id="regPassword" type="password" autocomplete="new-password" placeholder="Vytvor heslo"></div><button id="registerBtn" class="full">Požiadať o registráciu</button><div id="registerMessage" class="message hidden" role="status"></div></div></section>
+<section id="appScreen" class="hidden"><div class="card"><div class="row"><div><h2 id="welcome">Moja evidencia</h2><p id="approvalInfo" class="sub"></p></div><button id="logoutBtn" class="secondary">Odhlásiť sa</button></div><div id="appMessage" class="message hidden" role="status"></div></div><div id="pendingScreen" class="card hidden"><h2>Čaká sa na schválenie</h2><p>Konateľ musí schváliť tvoj účet.</p><button id="refreshApproval" class="secondary">Skontrolovať schválenie</button></div><div id="workerApp" class="hidden"><div class="tabs"><button data-tab="entry" class="active">Zadať hodiny</button><button data-tab="mine">Moje výkazy</button><button id="adminTab" data-tab="admin" class="hidden">Pracovníci</button></div><section id="tab-entry" class="card"><h2>Týždenný výkaz</h2><p class="sub">Od pondelka do nedele – práca a cesta.</p><div class="field"><label for="weekDate">Dátum v týždni</label><input id="weekDate" type="date"></div><div class="field"><label for="site">Zákazka / pracovisko</label><input id="site" placeholder="Napr. MIBRAG"></div><div class="field"><label for="note">Poznámka (nepovinné)</label><textarea id="note" rows="2"></textarea></div><div class="small">Deň a dátum / hodiny v práci / hodiny na ceste</div><div id="days"></div><div class="total"><span>Práca spolu</span><span id="workTotal">0 h</span></div><div class="total"><span>Cesta spolu</span><span id="travelTotal">0 h</span></div><button id="submitTimesheet" class="full">Uložiť týždenný výkaz</button><p class="note">Ukladanie vyžaduje tabuľku timesheets so správnymi stĺpcami a pravidlami RLS.</p></section><section id="tab-mine" class="card hidden"><h2>Moje výkazy</h2><div id="myEntries"></div></section><section id="tab-admin" class="card hidden"><h2>Schválenie pracovníkov</h2><div id="workersList"></div></section></div></section><div class="footer">MiNi Technik · online evidencia pracovného času</div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-/* Verejná konfigurácia Supabase. Publishable key je určený pre klientsku aplikáciu;
-   prístup musí byť zabezpečený politikami RLS v databáze. */
-const SUPABASE_URL = 'https://jmirxaqvsiabmexznmxx.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XlwNxKly9NG9dYxylSHRjg_PfprPI8v';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const $ = id => document.getElementById(id);
-let user = null, profile = null, activeTab = 'entry';
-const daysSk = ['Po','Ut','St','Št','Pi','So','Ne'];
-const say = (msg, type='') => { const el=$('toast'); el.textContent=msg; el.className='message'+(type?' '+type:''); el.classList.remove('hidden'); };
-const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-function monday(dateString){const d=new Date((dateString||iso(new Date()))+'T12:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
-function buildDays(){
- const start=monday($('weekDate').value); let html='';
- for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);const date=iso(d);
- html+=`<div class="dayrow"><div class="day">${daysSk[i]}</div><div><div class="smalllabel">${date.slice(8,10)}.${date.slice(5,7)} · Práca</div><input class="workHour" data-date="${date}" type="number" min="0" max="99" step="0.25" value="0" inputmode="decimal" aria-label="${daysSk[i]} hodiny v práci"></div><div><div class="smalllabel">${date.slice(8,10)}.${date.slice(5,7)} · Cesta</div><input class="travelHour" data-date="${date}" type="number" min="0" max="99" step="0.25" value="0" inputmode="decimal" aria-label="${daysSk[i]} hodiny na ceste"></div></div>`}
- $('days').innerHTML=html;document.querySelectorAll('.workHour,.travelHour').forEach(x=>x.addEventListener('input',totals));totals();
-}
-function totals(){$('workTotal').textContent=[...document.querySelectorAll('.workHour')].reduce((a,x)=>a+(Number(x.value)||0),0)+' h';$('travelTotal').textContent=[...document.querySelectorAll('.travelHour')].reduce((a,x)=>a+(Number(x.value)||0),0)+' h'}
-function showTab(tab){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['entry','mine','admin'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==tab));if(tab==='mine')loadMyEntries();if(tab==='admin')loadWorkers()}
-document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
-async function loadProfile(){
- if(!user)return;
- const {data,error}=await supabase.from('profiles').select('id,full_name,role,approved').eq('id',user.id).maybeSingle();
- if(error){say('Nepodarilo sa načítať profil: '+error.message,'bad');return}
- profile=data;
- if(!profile){say('Profil sa ešte nevytvoril. Odhlás sa a skús to o chvíľu.','bad');return}
- $('authScreen').classList.add('hidden');$('appScreen').classList.remove('hidden');
- $('sessionInfo').textContent=profile.full_name||user.email;$('welcome').textContent=profile.role==='admin'?'Správa MiNi Technik':'Moja evidencia';
- $('approvalInfo').textContent=`Prihlásený účet: ${profile.full_name||user.email}`;
- const approved=profile.role==='admin'||profile.approved===true;
- $('pendingScreen').classList.toggle('hidden',approved);$('workerApp').classList.toggle('hidden',!approved);
- $('adminTab').classList.toggle('hidden',profile.role!=='admin');
- if(approved)showTab('entry');
-}
-$('loginBtn').onclick=async()=>{
- const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
- if(!email||!password){say('Zadaj e-mail a heslo.','bad');return}
- $('loginBtn').disabled=true;
- const {error}=await supabase.auth.signInWithPassword({email,password});
- $('loginBtn').disabled=false;
- if(error){say('Prihlásenie sa nepodarilo: '+error.message,'bad');return}
- const {data}=await supabase.auth.getUser();user=data.user;await loadProfile();
-};
-$('registerBtn').onclick=async()=>{
- const name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value;
- if(!name||!email||password.length<6){say('Vyplň meno, správny e-mail a heslo aspoň so 6 znakmi.','bad');return}
- $('registerBtn').disabled=true;
- const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:name}}});
- $('registerBtn').disabled=false;
- if(error){say('Registrácia sa nepodarila: '+error.message,'bad');return}
- // Trigger v databáze vytvorí profil ako worker / approved=false.
- say(data.session?'Registrácia prebehla. Účet čaká na schválenie konateľom.':'Registrácia prijatá. Ak Supabase vyžaduje potvrdenie e-mailu, najprv otvor e-mail a potvrď účet. Potom sa prihlás.','good');
-};
-$('logoutBtn').onclick=async()=>{await supabase.auth.signOut();user=null;profile=null;$('appScreen').classList.add('hidden');$('authScreen').classList.remove('hidden');$('sessionInfo').textContent='Neprihlásený'};
-$('refreshApproval').onclick=async()=>{const {data}=await supabase.auth.getUser();user=data.user;await loadProfile()};
-$('weekDate').value=iso(monday(iso(new Date())));buildDays();$('weekDate').addEventListener('change',buildDays);
-async function loadMyEntries(){
- const host=$('myEntries');host.innerHTML='<p class="muted">Načítavam výkazy…</p>';
- // Stĺpce dátum/hodiny sa môžu líšiť podľa existujúcej tabuľky. Ak sa zobrazí chyba,
- // treba skontrolovať štruktúru timesheets v Supabase pred úpravou tohto dotazu.
- const {data,error}=await supabase.from('timesheets').select('*').order('created_at',{ascending:false}).limit(100);
- if(error){host.innerHTML='<div class="message bad">Nepodarilo sa načítať tabuľku timesheets: '+escapeHtml(error.message)+'. Treba overiť názvy stĺpcov a pravidlá RLS v Supabase.</div>';return}
- if(!data||!data.length){host.innerHTML='<p class="muted">Zatiaľ nie sú dostupné žiadne výkazy.</p>';return}
- host.innerHTML=data.map(r=>`<div class="entry"><strong>${escapeHtml(r.work_date||r.date||r.week_start||'Výkaz')} · ${escapeHtml(r.site||r.work_site||'')}</strong><p>${escapeHtml(r.hours??r.work_hours??'—')} h v práci · ${escapeHtml(r.travel_hours??r.travelHours??'—')} h na ceste</p><p>${escapeHtml(r.note||r.notes||'')}</p><span class="status ${r.status==='approved'||r.status==='Schválené'?'ok':''}">${escapeHtml(r.status||'Odoslané')}</span></div>`).join('');
-}
-async function loadWorkers(){
- const host=$('workersList');host.innerHTML='<p class="muted">Načítavam pracovníkov…</p>';
- if(profile?.role!=='admin'){host.innerHTML='<p>Táto časť je iba pre administrátora.</p>';return}
- const {data,error}=await supabase.from('profiles').select('id,full_name,role,approved,created_at').order('created_at',{ascending:false});
- if(error){host.innerHTML='<div class="message bad">Nepodarilo sa načítať profily: '+escapeHtml(error.message)+'</div>';return}
- const workers=(data||[]).filter(p=>p.role!=='admin');
- if(!workers.length){host.innerHTML='<p class="muted">Zatiaľ nie sú zaregistrovaní pracovníci.</p>';return}
- host.innerHTML=workers.map(p=>`<div class="entry"><strong>${escapeHtml(p.full_name||'Bez mena')}</strong><p>${p.approved?'Schválený účet':'Čaká na schválenie'}</p><div class="row">${p.approved?'<span class="status ok">Schválený</span>':`<button onclick="approveWorker('${p.id}')">Schváliť pracovníka</button>`}</div></div>`).join('');
-}
-window.approveWorker=async(id)=>{
- // Zámerne používa iba klientsku rolu; databázová RLS musí povoľovať adminovi zmenu approved.
- const {error}=await supabase.from('profiles').update({approved:true}).eq('id',id);
- if(error){say('Schválenie sa nepodarilo. Treba nastaviť bezpečnú admin RLS politiku v Supabase: '+error.message,'bad');return}
- say('Pracovník bol schválený.','good');loadWorkers();
-};
-$('submitTimesheet').onclick=async()=>{
- if(!user||!profile)return;
- if(profile.role!=='admin'&&profile.approved!==true){say('Účet ešte čaká na schválenie.','bad');return}
- const site=$('site').value.trim(),note=$('note').value.trim();
- if(!site){say('Zadaj zákazku alebo pracovisko.','bad');return}
- const rows=[...document.querySelectorAll('.workHour')].map((x,i)=>({date:x.dataset.date,hours:Number(x.value)||0,travel_hours:Number(document.querySelectorAll('.travelHour')[i].value)||0})).filter(x=>x.hours>0||x.travel_hours>0);
- if(!rows.length){say('Zadaj aspoň nejaké hodiny.','bad');return}
- /* Dôležité: neodosielame odhadované názvy stĺpcov do databázy. Najprv sa overí
-    schéma tabuľky timesheets; ak chýba, zobrazí sa zrozumiteľná chyba. */
- const {data:cols,error:probeError}=await supabase.from('timesheets').select('*').limit(0);
- if(probeError){say('Tabuľka timesheets nie je dostupná alebo jej prístup blokuje RLS. Pošli mi túto chybu: '+probeError.message,'bad');return}
- const sample=cols&&cols[0]?Object.keys(cols[0]):[];
- const candidates=[
-  {user_id:user.id,work_date:rows[0].date,hours:rows.reduce((s,r)=>s+r.hours,0),travel_hours:rows.reduce((s,r)=>s+r.travel_hours,0),site,note,status:'pending'},
-  {user_id:user.id,date:rows[0].date,hours:rows.reduce((s,r)=>s+r.hours,0),travel_hours:rows.reduce((s,r)=>s+r.travel_hours,0),site,note,status:'pending'},
-  {user_id:user.id,week_start:monday($('weekDate').value).toISOString().slice(0,10),hours:rows.reduce((s,r)=>s+r.hours,0),travel_hours:rows.reduce((s,r)=>s+r.travel_hours,0),site,note,status:'pending'}
- ];
- const payload=candidates[0];
- const {error}=await supabase.from('timesheets').insert(payload);
- if(error){say('Výkaz sa zatiaľ neuložil. Databáza má zrejme iné názvy stĺpcov alebo pravidlá RLS. Chyba: '+error.message,'bad');return}
- say('Výkaz bol uložený.','good');$('site').value='';$('note').value='';buildDays();showTab('mine');
-};
-(async()=>{
- const {data:{session}}=await supabase.auth.getSession();
- if(session){user=session.user;await loadProfile()}
- supabase.auth.onAuthStateChange((_event,session)=>{if(session){user=session.user;setTimeout(loadProfile,0)}});
-})();
-</script>
-</body>
-</html>
+'use strict';
+const SUPABASE_URL='https://jmirxaqvsiabmexznmxx.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_XlwNxKly9NG9dYxylSHRjg_PfprPI8v';
+const $=id=>document.getElementById(id);
+const msg=(id,text,kind='bad')=>{const el=$(id);el.textContent=text;el.className='message '+kind;};
+const hide=id=>$(id).classList.add('hidden');
+const show=id=>$(id).classList.remove('hidden');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const monday=s=>{const d=new Date((s||iso(new Date()))+'T12:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return d};
+let db,user=null,profile=null;
+const dayNames=['Po','Ut','St','Št','Pi','So','Ne'];
+function totals(){for(const [cls,target] of [['workHour','workTotal'],['travelHour','travelTotal']]){$(target).textContent=Array.from(document.querySelectorAll('.'+cls)).reduce((n,x)=>n+(Number(x.value)||0),0)+' h'}}
+function buildDays(){const start=monday($('weekDate').value);$('days').innerHTML=dayNames.map((name,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const date=iso(d);return `<div class="dayrow"><strong>${name}<div class="small">${date.slice(8)}.${date.slice(5,7)}</div></strong><input class="workHour" data-date="${date}" type="number" min="0" max="99" step="0.25" value="0" inputmode="decimal" aria-label="${name} práca"><input class="travelHour" type="number" min="0" max="99" step="0.25" value="0" inputmode="decimal" aria-label="${name} cesta"></div>`}).join('');document.querySelectorAll('.workHour,.travelHour').forEach(e=>e.addEventListener('input',totals));totals()}
+function tab(name){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['entry','mine','admin'].forEach(t=>$("tab-"+t).classList.toggle('hidden',t!==name));if(name==='mine')loadMyEntries();if(name==='admin')loadWorkers()}
+function resetView(){user=null;profile=null;hide('appScreen');show('authScreen');$('sessionInfo').textContent='Neprihlásený'}
+async function loadProfile(){if(!user)return;try{const {data,error}=await db.from('profiles').select('id,full_name,role,approved').eq('id',user.id).maybeSingle();if(error)throw error;if(!data){msg('loginMessage','Prihlásenie prebehlo, ale profil v tabuľke profiles neexistuje. Skontroluj databázový trigger a RLS.');return}profile=data;hide('authScreen');show('appScreen');$('sessionInfo').textContent=profile.full_name||user.email;$('welcome').textContent=profile.role==='admin'?'Správa MiNi Technik':'Moja evidencia';$('approvalInfo').textContent='Prihlásený: '+(profile.full_name||user.email);const approved=profile.role==='admin'||profile.approved===true;$('pendingScreen').classList.toggle('hidden',approved);$('workerApp').classList.toggle('hidden',!approved);$('adminTab').classList.toggle('hidden',profile.role!=='admin');if(approved)tab('entry')}catch(e){msg('loginMessage','Chyba profilu: '+e.message);msg('appMessage','Chyba profilu: '+e.message)}}
+async function login(){const email=$('loginEmail').value.trim(),password=$('loginPassword').value;if(!email||!password){msg('loginMessage','Zadaj e-mail a heslo.');return}const btn=$('loginBtn');btn.disabled=true;btn.textContent='Prihlasujem…';try{const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;user=data.user;msg('loginMessage','Prihlásenie úspešné. Načítavam profil…','good');await loadProfile()}catch(e){msg('loginMessage','Prihlásenie sa nepodarilo: '+(e.message||String(e)))}finally{btn.disabled=false;btn.textContent='Prihlásiť sa'}}
+async function register(){const name=$('regName').value.trim(),email=$('regEmail').value.trim(),password=$('regPassword').value;if(!name||!email||password.length<6){msg('registerMessage','Vyplň meno, e-mail a heslo aspoň so 6 znakmi.');return}const btn=$('registerBtn');btn.disabled=true;try{const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name:name}}});if(error)throw error;msg('registerMessage',data.session?'Registrácia prebehla. Účet čaká na schválenie.':'Registrácia prijatá. Ak sa vyžaduje potvrdenie e-mailu, potvrď ho a potom sa prihlás.','good')}catch(e){msg('registerMessage','Registrácia sa nepodarila: '+e.message)}finally{btn.disabled=false}}
+async function loadMyEntries(){const host=$('myEntries');host.textContent='Načítavam…';try{const {data,error}=await db.from('timesheets').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100);if(error)throw error;host.innerHTML=(data||[]).length?data.map(r=>`<div class="entry"><strong>${esc(r.work_date||r.date||r.week_start||'Výkaz')} · ${esc(r.site||'')}</strong><p>Práca: ${esc(r.hours??r.work_hours??'—')} h · Cesta: ${esc(r.travel_hours??'—')} h</p><p>${esc(r.note||'')}</p></div>`).join(''):'Zatiaľ nemáš uložené výkazy.'}catch(e){host.textContent='Chyba načítania výkazov: '+e.message}}
+async function loadWorkers(){const host=$('workersList');if(profile?.role!=='admin')return;host.textContent='Načítavam…';try{const {data,error}=await db.from('profiles').select('id,full_name,role,approved').order('full_name');if(error)throw error;const workers=(data||[]).filter(x=>x.role!=='admin');host.replaceChildren();if(!workers.length){host.textContent='Zatiaľ žiadni pracovníci.';return}for(const p of workers){const div=document.createElement('div');div.className='entry';const strong=document.createElement('strong');strong.textContent=p.full_name||'Bez mena';div.append(strong);const status=document.createElement('p');status.textContent=p.approved?'Schválený':'Čaká na schválenie';div.append(status);if(!p.approved){const btn=document.createElement('button');btn.textContent='Schváliť pracovníka';btn.onclick=async()=>{btn.disabled=true;try{const {error}=await db.from('profiles').update({approved:true}).eq('id',p.id);if(error)throw error;await loadWorkers()}catch(e){msg('appMessage','Schválenie zlyhalo: '+e.message)}finally{btn.disabled=false}};div.append(btn)}host.append(div)}}catch(e){host.textContent='Chyba načítania pracovníkov: '+e.message}}
+async function saveTimesheet(){if(!user||!profile)return;if(profile.role!=='admin'&&profile.approved!==true){msg('appMessage','Účet čaká na schválenie.');return}const site=$('site').value.trim(),note=$('note').value.trim();if(!site){msg('appMessage','Zadaj zákazku alebo pracovisko.');return}const work=[...document.querySelectorAll('.workHour')],travel=[...document.querySelectorAll('.travelHour')];const rows=work.map((x,i)=>({date:x.dataset.date,hours:Number(x.value),travel_hours:Number(travel[i].value)}));if(rows.some(r=>!Number.isFinite(r.hours)||!Number.isFinite(r.travel_hours)||r.hours<0||r.hours>99||r.travel_hours<0||r.travel_hours>99)){msg('appMessage','Hodiny musia byť čísla od 0 do 99.');return}const nonzero=rows.filter(r=>r.hours||r.travel_hours);if(!nonzero.length){msg('appMessage','Zadaj aspoň nejaké hodiny.');return}const btn=$('submitTimesheet');btn.disabled=true;try{/* Jeden záznam za každý deň. Databáza musí mať stĺpce user_id,work_date,hours,travel_hours,site,note. */const payload=nonzero.map(r=>({user_id:user.id,work_date:r.date,hours:r.hours,travel_hours:r.travel_hours,site,note}));const {error}=await db.from('timesheets').insert(payload);if(error)throw error;msg('appMessage','Výkaz bol úspešne uložený.','good');$('site').value='';$('note').value='';buildDays();tab('mine')}catch(e){msg('appMessage','Výkaz sa neuložil: '+e.message+'. Skontroluj stĺpce timesheets a RLS.')}finally{btn.disabled=false}}
+function init(){try{if(!window.supabase||typeof window.supabase.createClient!=='function')throw Error('Knižnica Supabase sa nenačítala. Skontroluj internet alebo blokovanie CDN.');db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);msg('startup','Aplikácia je pripravená na prihlásenie.','good');setTimeout(()=>hide('startup'),3500);$('loginBtn').addEventListener('click',login);$('registerBtn').addEventListener('click',register);$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('logoutBtn').addEventListener('click',async()=>{try{await db.auth.signOut()}catch(e){msg('appMessage',e.message)}resetView()});$('refreshApproval').addEventListener('click',async()=>{await loadProfile()});$('submitTimesheet').addEventListener('click',saveTimesheet);document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));$('weekDate').value=iso(monday(iso(new Date())));$('weekDate').addEventListener('change',buildDays);buildDays();db.auth.getSession().then(async({data,error})=>{if(error)throw error;if(data.session){user=data.session.user;await loadProfile()}}).catch(e=>msg('startup','Chyba obnovenia relácie: '+e.message));db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT')resetView()})}catch(e){msg('startup','Aplikáciu sa nepodarilo spustiť: '+e.message)}}
+window.addEventListener('error',e=>msg('startup','Chyba JavaScriptu: '+e.message));
+window.addEventListener('unhandledrejection',e=>msg('startup','Chyba spojenia: '+(e.reason?.message||String(e.reason))));
+init();
+</script></body></html>
