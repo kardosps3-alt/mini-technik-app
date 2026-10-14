@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171717">
+<title>MiNi Technik</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f4f6;color:#171717;font-family:Arial,sans-serif}
+header{background:#171717;color:white;padding:22px 18px;border-bottom:4px solid #ff7900}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0;color:#ddd;font-size:13px}
+main{max-width:560px;margin:auto;padding:18px}
+.card{background:white;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 2px 9px #0000000b}
+h2{font-size:19px;margin:0 0 15px}
+label{display:block;font-size:14px;font-weight:bold;margin:13px 0 6px}
+input,select,button{font:inherit;width:100%;padding:12px;border-radius:8px}
+input,select{border:1px solid #cbd0d6;background:white}
+button{border:0;background:#ff7900;color:#171717;font-weight:bold;margin-top:14px;cursor:pointer}
+.note{font-size:13px;color:#555;line-height:1.5}
+.status{background:#fff3e8;border-radius:8px;padding:12px;font-size:14px}
+footer{text-align:center;color:#666;font-size:12px;padding:15px}
+</style>
+</head>
+<body>
+<header>
+<h1>MiNi Technik</h1>
+<p>EVIDENCIA PRACOVNÍKOV A PRACOVNÝCH HODÍN</p>
+</header>
+<main>
+<section class="card">
+<h2>Prihlásenie pracovníka</h2>
+<p class="note">Toto je zatiaľ ukážková obrazovka. Účet ani heslo sa ešte nikam neodosielajú.</p>
+<label for="email">E-mail</label>
+<input id="email" type="email" placeholder="meno@firma.sk" autocomplete="email">
+<label for="password">Heslo</label>
+<input id="password" type="password" placeholder="Zadaj heslo" autocomplete="current-password">
+<button type="button" onclick="alert('Prihlasovanie ešte nie je pripojené k databáze.')">Prihlásiť sa</button>
+</section>
+<section class="card">
+<h2>Registrácia pracovníka</h2>
+<p class="note">Nové účty majú byť po pripojení databázy schválené administrátorom.</p>
+<label for="fullname">Meno a priezvisko</label>
+<input id="fullname" type="text" placeholder="Meno pracovníka" autocomplete="name">
+<label for="regemail">E-mail</label>
+<input id="regemail" type="email" placeholder="meno@firma.sk" autocomplete="email">
+<label for="regpassword">Heslo</label>
+<input id="regpassword" type="password" placeholder="Vytvor heslo" autocomplete="new-password">
+<button type="button" onclick="alert('Registrácia ešte nie je pripojená k databáze.')">Požiadať o registráciu</button>
+</section>
+<section class="card">
+<h2>Pracovný výkaz</h2>
+<p class="note">Po pripojení databázy tu pracovník vyplní hodiny za jednotlivé dni týždňa.</p>
+<div class="status">Evidencia hodín bude dostupná po dokončení pripojenia.</div>
+</section>
+</main>
+<footer>MiNi Technik s.r.o. · Pracovná verzia aplikácie</footer>
+</body>
+</html>
