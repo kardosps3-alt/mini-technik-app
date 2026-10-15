@@ -23,7 +23,7 @@ function reset(){if($('week'))$('week').disabled=false;if($('reset'))$('reset').
 async function loadProfile(){const r=await db.from('profiles').select('*').eq('id',user.id).maybeSingle();if(r.error)throw r.error;profile=r.data;return profile}
 async function refresh(){
  const s=await db.auth.getUser();user=s.data.user;show('auth',!user);show('app',!!user);
- if(!user){profile=null;records=[];msg('Prihláste sa.');return}
+ if(!user){profile=null;records=[];editing=null;editingWorker=null;adminSource=null;show('detail',false);show('editor',false);$('detailbody').replaceChildren();show('print',false);$('print').replaceChildren();msg('Prihláste sa.');return}
  await loadProfile();$('userlabel').textContent=profile?.full_name||user.email;
  const approved=profile?.approved===true||profile?.status==='approved';
  show('pending',!approved);show('approved',approved);
@@ -93,5 +93,5 @@ function tab(name){
   $('listtitle').textContent=isAdmin?'Výkazy pracovníkov':'Moje výkazy';loadEntries();
  }
 }
-async function init(){reset();$('monthPick').value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');$('monthPick').addEventListener('change',renderMonthly);$('week').addEventListener('change',()=>{dates();sum()});$('closedetail').onclick=()=>show('detail',false);$('login').onclick=login;$('register').onclick=register;$('save').onclick=save;$('reset').onclick=()=>{reset();if(profile?.role==='admin')show('editor',false)};$('logout').onclick=async()=>{await db.auth.signOut();await refresh()};$('tabmine').onclick=()=>tab('mine');$('taball').onclick=()=>tab('all');$('tabusers').onclick=()=>tab('users');if(!window.supabase?.createClient){show('auth',true);msg('Nepodarilo sa načítať knižnicu Supabase. Skontrolujte internetové pripojenie.',true);return}try{db=window.supabase.createClient(SUPABASE_URL,KEY);await refresh()}catch(e){show('auth',true);msg('Chyba pripojenia: '+e.message,true)}}init();
+async function init(){reset();$('monthPick').value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');$('monthPick').addEventListener('change',renderMonthly);$('week').addEventListener('change',()=>{dates();sum()});$('closedetail').onclick=()=>show('detail',false);$('login').onclick=login;$('register').onclick=register;$('save').onclick=save;$('reset').onclick=()=>{reset();if(profile?.role==='admin')show('editor',false)};$('logout').onclick=async()=>{show('detail',false);show('editor',false);$('detailbody').replaceChildren();show('print',false);$('print').replaceChildren();await db.auth.signOut();await refresh()};$('tabmine').onclick=()=>tab('mine');$('taball').onclick=()=>tab('all');$('tabusers').onclick=()=>tab('users');if(!window.supabase?.createClient){show('auth',true);msg('Nepodarilo sa načítať knižnicu Supabase. Skontrolujte internetové pripojenie.',true);return}try{db=window.supabase.createClient(SUPABASE_URL,KEY);await refresh()}catch(e){show('auth',true);msg('Chyba pripojenia: '+e.message,true)}}init();
 </script></body></html>
