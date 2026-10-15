@@ -51,7 +51,7 @@ function renderMonthly(){
  let html=`<p class="muted">Počet týždenných výkazov zasahujúcich do mesiaca: ${totalReports}</p>`;
  if(isAdmin){html+=box('Originály pracovníkov – spolu',allOriginal)+box('Moje administrátorské verzie – spolu',allAdmin);
   html+='<h3>Podľa pracovníkov</h3>';
-  for(const entry of [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'sk'))){html+=`<div class="entry"><b>${esc(entry.name)}</b><p class="muted">Výkazy: ${entry.reports}</p><div>Originál: ${entry.original.work} h práca, ${entry.original.travel} h cesta</div><div>Moja verzia: ${entry.revised.work} h práca, ${entry.revised.travel} h cesta</div></div>`}
+  for(const entry of [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'sk'))){html+=`<div class="entry"><b>${esc(entry.name)}</b><p class="muted">Výkazy: ${entry.reports}</p><div>Originál: ${entry.original.work} h práca, ${entry.original.travel} h cesta — <b>Spolu: ${entry.original.work+entry.original.travel} h</b></div><div>Moja verzia: ${entry.revised.work} h práca, ${entry.revised.travel} h cesta — <b>Spolu: ${entry.revised.work+entry.revised.travel} h</b></div></div>`}
  }else html+=box('Moje hodiny za mesiac',allOriginal);
  $('monthBody').innerHTML=html+(totalReports?'':'<p>Za vybraný mesiac zatiaľ nie sú žiadne výkazy.</p>');
 }
