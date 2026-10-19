@@ -11,6 +11,7 @@
 <label for="rateAmount">Hodinová sadzba (€/h)</label><input id="rateAmount" type="number" min="0" step="0.01" inputmode="decimal">
 <div class="row" style="margin-top:12px"><button id="rateSave">Uložiť sadzbu</button><button id="rateReload" class="secondary">Obnoviť údaje</button></div>
 <div id="rateInfo" class="entry muted" aria-live="polite">Vyberte pracovníka a mesiac.</div>
+<div id="rateWeeks" class="entry" aria-live="polite">Kontrola týždenných výkazov sa načíta po výbere mesiaca.</div>
 </section><section id="admin" class="card hidden"><h2>Schvaľovanie pracovníkov</h2><div id="users"></div></section></div></section><section id="detail" class="card hidden"><div class="row"><h2 style="margin:0">Detail výkazu</h2><button id="closedetail" class="secondary">Zavrieť</button></div><div id="detailbody"></div><div class="row" style="margin-top:15px"><button id="detailpdf">PDF / Tlač</button><button id="detailedit" class="secondary">Upraviť výkaz</button></div></section><section id="print" class="card hidden"></section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
 'use strict';
@@ -138,7 +139,44 @@ async function loadRateDetail(){
    'Faktúra sa zatiaľ nevytvára. Pred jej vystavením sa budú kontrolovať chýbajúce výkazy.'
   ];
   for(const line of lines){const d=document.createElement('p');d.textContent=line;info.append(d)}
+  await checkInvoiceWeeks(id,month);
  }catch(e){info.textContent='Chyba: '+e.message}
+}
+// Kontrola originálnych týždenných výkazov za všetky týždne zasahujúce do mesiaca.
+// Týždeň, ktorý zasahuje do dvoch mesiacov, sa kontroluje v oboch mesiacoch.
+async function checkInvoiceWeeks(workerId,month){
+ const target=$('rateWeeks');
+ if(!target)return;
+ target.textContent='Kontrolujem týždenné výkazy…';
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)){target.textContent='Neplatný mesiac.';return}
+ const [year,mon]=month.split('-').map(Number);
+ const first=new Date(Date.UTC(year,mon-1,1));
+ const last=new Date(Date.UTC(year,mon,0));
+ const weekStart=d=>{const x=new Date(d);x.setUTCDate(x.getUTCDate()-((x.getUTCDay()+6)%7));return x};
+ const iso=d=>d.toISOString().slice(0,10);
+ const start=weekStart(first),end=weekStart(last);
+ try{
+  const res=await db.from('timesheets').select('week_start').eq('worker_id',workerId).gte('week_start',iso(start)).lte('week_start',iso(end));
+  if(res.error)throw res.error;
+  const submitted=new Set((res.data||[]).map(r=>r.week_start));
+  const expected=[];
+  for(let d=new Date(start);d<=end;d.setUTCDate(d.getUTCDate()+7))expected.push(iso(d));
+  const missing=expected.filter(w=>!submitted.has(w));
+  target.replaceChildren();
+  const heading=document.createElement('h3');heading.textContent='Kontrola týždenných výkazov';target.append(heading);
+  const status=document.createElement('p');status.style.fontWeight='700';
+  status.textContent=missing.length?'Chýba '+missing.length+' z '+expected.length+' výkazov – faktúru zatiaľ nemožno vystaviť.':'Všetky '+expected.length+' týždenné výkazy sú odoslané.';
+  status.style.color=missing.length?'#a30000':'#176a37';target.append(status);
+  for(const w of expected){
+   const row=document.createElement('p');
+   const endDate=new Date(w+'T00:00:00Z');endDate.setUTCDate(endDate.getUTCDate()+6);
+   row.textContent=(submitted.has(w)?'✓ ':'✗ ')+w+' – '+iso(endDate)+(submitted.has(w)?' · odoslaný':' · CHÝBA (aj nulový výkaz je povinný)');
+   target.append(row);
+  }
+  const note=document.createElement('p');note.className='muted';
+  note.textContent='Kontrola používa originálne výkazy pracovníka. Týždne na hranici mesiacov sa kontrolujú v oboch mesiacoch. Táto verzia zatiaľ faktúry nevystavuje.';
+  target.append(note);
+ }catch(e){target.textContent='Kontrola výkazov zlyhala: '+e.message}
 }
 async function saveRate(){
  if(profile?.role!=='admin'){msg('Prístup len pre administrátora.',true);return}
