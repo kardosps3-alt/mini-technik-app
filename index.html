@@ -142,10 +142,12 @@ async function loadRateDetail(){
 }
 async function saveRate(){
  if(profile?.role!=='admin'){msg('Prístup len pre administrátora.',true);return}
- const id=$('rateWorker').value,month=$('rateMonth').value,raw=$('rateAmount').value.trim(),amount=Number(raw);
- if(!id||!/^\\d{4}-\\d{2}$/.test(month)||raw===''||!Number.isFinite(amount)||amount<0||Math.round(amount*100)!==amount*100){
-  msg('Vyber pracovníka, mesiac a platnú sadzbu s najviac dvoma desatinnými miestami.',true);return;
- }
+ const id=$('rateWorker').value,month=$('rateMonth').value;
+ const raw=$('rateAmount').value.trim().replace(',', '.');
+ const amount=Number(raw);
+ if(!id){msg('Vyber pracovníka.',true);return}
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)){msg('Vyber platný fakturačný mesiac.',true);return}
+ if(!/^\d+(?:\.\d{1,2})?$/.test(raw)||!Number.isFinite(amount)||amount<0){msg('Zadaj platnú sadzbu, napríklad 35 alebo 35,50.',true);return}
  const b=$('rateSave');b.disabled=true;
  try{
   const r=await db.from('worker_invoice_rates').upsert({worker_id:id,invoice_month:month+'-01',hourly_rate:amount,currency:'EUR'},{onConflict:'worker_id,invoice_month'}).select('id');
