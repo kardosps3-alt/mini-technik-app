@@ -63,6 +63,8 @@ function renderMonthly(){
   for(const entry of [...map.values()].sort((a,b)=>a.name.localeCompare(b.name,'sk'))){html+=`<div class="entry"><b>${esc(entry.name)}</b><p class="muted">Výkazy: ${entry.reports}</p><div>Originál: ${entry.original.work} h práca, ${entry.original.travel} h cesta — <b>Spolu: ${entry.original.work+entry.original.travel} h</b></div><div>Moja verzia: ${entry.revised.work} h práca, ${entry.revised.travel} h cesta — <b>Spolu: ${entry.revised.work+entry.revised.travel} h</b></div></div>`}
  }else html+=box('Moje hodiny za mesiac',allOriginal);
  $('monthBody').innerHTML=html+(totalReports?'':'<p>Za vybraný mesiac zatiaľ nie sú žiadne výkazy.</p>');
+ const now=new Date();const currentMonth=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+ show('earlyClose',!isAdmin && month===currentMonth);
 }
 const workerName=v=>v.worker_name||((v.worker_id===user?.id)?(profile?.full_name||user?.email):null)||'Meno nie je dostupné';
 function editReport(v, useSavedVersion=false){
