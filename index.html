@@ -210,7 +210,7 @@ async function finalizeMonth(){
   const previous=await db.from('month_closures').select('worker_id,work_hours,travel_hours').eq('worker_id',user.id).eq('month_key',month).maybeSingle();
   if(previous.error)throw previous.error;
   if(previous.data){$('closureInfo').textContent='Mesiac '+month+' už je uzavretý: '+previous.data.work_hours+' h práce a '+previous.data.travel_hours+' h cesty.';return}
-  if(!confirm('Naozaj uzavrieť '+month+'?\nPráca: '+work+' h\nCesta: '+travel+' h\nSpolu: '+(work+travel)+' h\n\nVýkazy sa neprepíšu. Faktúra sa zatiaľ nevystaví.'))return;
+  if(!await greenConfirm('Uzavrieť mesiac '+month+'?', 'Práca: '+work+' h · Cesta: '+travel+' h · Spolu: '+(work+travel)+' h. Výkazy sa neprepíšu. Faktúra sa zatiaľ nevystaví.'))return;
   const saved=await db.from('month_closures').insert({worker_id:user.id,month_key:month,work_hours:work,travel_hours:travel}).select('worker_id');
   if(saved.error)throw saved.error;
   if(!saved.data?.length)throw Error('Databáza nepotvrdila uzavretie.');
@@ -218,6 +218,21 @@ async function finalizeMonth(){
   toastSuccess('Mesiac '+month+' bol uzavretý.');
  }catch(e){msg('Uzavretie mesiaca: '+e.message,true);$('closureInfo').textContent=e.message}
  finally{btn.disabled=false}
+}
+function greenConfirm(title,description){
+ return new Promise(resolve=>{
+  const overlay=document.createElement('div');overlay.style.cssText='position:fixed;inset:0;background:#0008;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+  const panel=document.createElement('div');panel.style.cssText='background:#e9f8ed;border:2px solid #208245;border-radius:16px;padding:22px;max-width:420px;width:100%;box-shadow:0 12px 35px #0004;color:#14532d';
+  const heading=document.createElement('h3');heading.textContent=title;heading.style.margin='0 0 12px';
+  const info=document.createElement('p');info.textContent=description;info.style.lineHeight='1.5';
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;justify-content:flex-end;margin-top:20px';
+  const cancel=document.createElement('button');cancel.textContent='Zrušiť';cancel.style.cssText='background:#fff;border:1px solid #208245;color:#14532d';
+  const accept=document.createElement('button');accept.textContent='Potvrdiť uzavretie';accept.style.cssText='background:#208245;color:#fff';
+  const finish=value=>{document.removeEventListener('keydown',esc);overlay.remove();resolve(value)};
+  const esc=e=>{if(e.key==='Escape')finish(false)};
+  cancel.onclick=()=>finish(false);accept.onclick=()=>finish(true);
+  actions.append(cancel,accept);panel.append(heading,info,actions);overlay.append(panel);document.body.append(overlay);document.addEventListener('keydown',esc);cancel.focus();
+ });
 }
 async function checkInvoiceWeeks(workerId,month){
  const target=$('rateWeeks');
