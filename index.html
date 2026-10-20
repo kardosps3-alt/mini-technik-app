@@ -70,7 +70,18 @@ let closedMonths=new Map();
 const monthOf=d=>d.slice(0,7);
 function coveredMonths(v){const a=new Set();for(let i=0;i<7;i++)a.add(monthOf(plus(v.week_start,i)));return [...a]}
 function isClosedFor(v,month){return closedMonths.has(v.worker_id+'|'+month)}
-function fullyClosed(v){return coveredMonths(v).every(m=>isClosedFor(v,m))}
+function fullyClosed(v){
+ // A report belongs on the active page only when it has an open-month day
+ // containing work, travel or a project, or when the open month has already begun.
+ // Future empty days in a new month must not keep a closed report active.
+ const days=toDays(v), today=new Date(), todayKey=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+ return days.every((d,i)=>{
+  const date=plus(v.week_start,i), month=monthOf(date);
+  if(isClosedFor(v,month))return true;
+  if(date>todayKey && !(Number(d.work_hours)||Number(d.travel_hours)||String(d.project_name||d.project||'').trim()))return true;
+  return false;
+ });
+}
 function touchesClosed(v){return coveredMonths(v).some(m=>isClosedFor(v,m))}
 async function loadClosures(){
  let q=db.from('month_closures').select('worker_id,month_key,work_hours,travel_hours');
