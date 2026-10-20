@@ -437,7 +437,7 @@ function showCustomerFields(row={}){
   const inp=document.createElement('input');inp.id='cust_'+key;inp.value=row[key]||'';inp.maxLength=180;
   $('customerFields').append(l,inp);
  }
- if(!row.id)$('cust_country').value='Slovensko';
+ if(!row.id && $('cust_country'))$('cust_country').value='Slovensko';
 }
 async function loadCustomers(){
  if(profile?.role!=='admin')return;
@@ -546,4 +546,4 @@ async function loadWorkerInvoice(){
   if(w+t<=0){add('Nulový mesiac – faktúra sa nevystavuje.');return}
   if(!r.data){add('Administrátor ešte nenastavil hodinovú sadzbu.');return}
   const rate=Number(r.data.hourly_rate),currency=r.data.currency||'EUR';
-  add('Sadzba: '+rate.toFixed(2)+' '+curre
+  add('Sadzba: '+rate
