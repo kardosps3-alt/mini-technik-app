@@ -40,6 +40,21 @@
 <p id="customerStatus" class="muted" aria-live="polite"></p>
 </div>
 </section><section id="admin" class="card hidden"><h2>Schvaľovanie pracovníkov</h2><div id="users"></div></section></div></section><section id="billingProfile" class="card hidden"><h2 id="billingProfileTitle">Môj profil</h2><p class="muted" id="billingProfileHint">Fakturačné údaje môžete kedykoľvek doplniť alebo upraviť.</p><div id="billingProfileFields"></div><div class="row" style="margin-top:14px"><button id="billingProfileSave">Uložiť moje údaje</button><button id="billingProfileBack" class="secondary">Späť</button></div><p id="billingProfileStatus" class="muted" aria-live="polite"></p></section><section id="detail" class="card hidden"><div class="row"><h2 style="margin:0">Detail výkazu</h2><button id="closedetail" class="secondary">Zavrieť</button></div><div id="detailbody"></div><div class="row" style="margin-top:15px"><button id="detailpdf">PDF / Tlač</button><button id="detailedit" class="secondary">Upraviť výkaz</button></div></section><section id="print" class="card hidden"></section></main>
+<script>
+(function(){
+  function rescue(reason){
+    var status=document.getElementById('status');
+    if(!status || !/Načítavam aplikáciu/.test(status.textContent||''))return;
+    status.textContent='Spustenie aplikácie trvá príliš dlho. '+(reason||'Skontrolujte pripojenie a skúste obnoviť stránku.');
+    status.style.color='#a30000';
+    var b=document.getElementById('miniRetryStart');
+    if(!b){b=document.createElement('button');b.id='miniRetryStart';b.textContent='Skúsiť znova';b.style.margin='10px 0';b.onclick=function(){location.reload()};status.insertAdjacentElement('afterend',b)}
+  }
+  window.addEventListener('error',function(e){rescue('Chyba: '+(e.message||'neznáma chyba'))});
+  window.addEventListener('unhandledrejection',function(e){rescue('Chyba: '+(e.reason&&e.reason.message||'neznáma chyba'))});
+  setTimeout(function(){rescue('Server neodpovedá alebo sa nenačítala knižnica.')},12000);
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script>
 window.addEventListener('error',function(e){var m=document.getElementById('msg');if(m)m.textContent='Chyba spustenia: '+(e.message||'neznáma chyba');});
 window.addEventListener('unhandledrejection',function(e){var m=document.getElementById('msg');if(m)m.textContent='Chyba načítania: '+(e.reason?.message||String(e.reason));});
@@ -493,11 +508,4 @@ async function invoiceArchivePdf(invId){
  const table=document.createElement('table');table.style.cssText='border-collapse:collapse;width:100%;font-size:14px';
  const head=document.createElement('tr');for(const label of ['Položka','Hodiny','Sadzba','Spolu']){const th=document.createElement('th');th.textContent=label;th.style.cssText='padding:12px;border:1px solid #bbb;background:#f1f1f1;text-align:left';head.append(th)}table.append(head);
  for(const [label,hours] of [['Práca',inv.work_hours],['Cesta',inv.travel_hours]]){const tr=document.createElement('tr');for(const value of [label,String(Number(hours||0))+' h',invoiceMoney(inv.hourly_rate),invoiceMoney(Number(hours||0)*Number(inv.hourly_rate||0))]){const td=document.createElement('td');td.textContent=value;td.style.cssText='padding:12px;border:1px solid #bbb';tr.append(td)}table.append(tr)}wrap.append(table);
- const total=document.createElement('div');total.style.cssText='font-size:25px;font-weight:bold;text-align:right;margin:22px 0 35px';total.textContent='CELKOM: '+invoiceMoney(inv.total_amount);wrap.append(total);
- const iban=inv.supplier_snapshot?.iban;if(iban){const pay=document.createElement('div');pay.textContent='IBAN: '+iban+(inv.supplier_snapshot?.swift_bic?'  |  SWIFT/BIC: '+inv.supplier_snapshot.swift_bic:'');wrap.append(pay)}
- const note=document.createElement('p');note.style.cssText='font-size:12px;color:#555;margin-top:35px';note.textContent='Faktúra vytvorená z údajov uložených pri jej vystavení. Evidencia MiNi Technik.';wrap.append(note);
- document.body.append(wrap);
- try{
-  const canvas=await window.html2canvas(wrap,{scale:2,backgroundColor:'#ffffff',useCORS:false,logging:false});
-  const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-  const pageWidth=210,pageHei
+ con
