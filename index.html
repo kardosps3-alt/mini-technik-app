@@ -86,7 +86,7 @@ function touchesClosed(v){return coveredMonths(v).some(m=>isClosedFor(v,m))}
 async function loadClosures(){
  let q=db.from('month_closures').select('worker_id,month_key,work_hours,travel_hours');
  if(profile?.role!=='admin')q=q.eq('worker_id',user.id);
- const r=await q;if(r.error)throw r.error;
+ const r=await q;if(r.error){if(profile?.role==='admin')$('archiveBody').textContent='Chyba načítania archívu: '+r.error.message;throw r.error;}
  closedMonths=new Map((r.data||[]).map(c=>[c.worker_id+'|'+c.month_key,c]));
  updateClosureStatus();
 }
@@ -101,7 +101,7 @@ function updateClosureStatus(){
 function renderArchive(){
  const root=$('archiveBody');root.replaceChildren();
  const clos=[...closedMonths.values()].sort((a,b)=>b.month_key.localeCompare(a.month_key));
- if(!clos.length){root.textContent='Zatiaľ nie sú uzavreté žiadne mesiace.';return}
+ if(!clos.length){root.textContent=profile?.role==='admin'?'Administrátor nevidí žiadne uzavreté mesiace. Ak pracovník mesiac uzavrel, skontrolujte pravidlá SELECT (RLS) pre tabuľku month_closures v Supabase.':'Zatiaľ nie sú uzavreté žiadne mesiace.';return}
  const groups=new Map();for(const c of clos){const y=c.month_key.slice(0,4);if(!groups.has(y))groups.set(y,[]);groups.get(y).push(c)}
  for(const [year,items] of groups){const heading=document.createElement('h3');heading.textContent=year;root.append(heading);
  for(const c of items){const wrap=document.createElement('details');wrap.className='archive-month';const summary=document.createElement('summary');
