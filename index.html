@@ -15,6 +15,7 @@
 <label for="customerAssign">Vybrať odberateľa</label>
 <select id="customerAssign" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:9px"></select>
 
+<button id="customerAssignSave" type="button" class="secondary">Uložiť odberateľa pre mesiac</button>
 <p id="customerAssignStatus" class="muted" aria-live="polite"></p>
 </div>
 <div class="row" style="margin-top:12px"><button id="rateSave">Uložiť nastavenia</button><button id="rateReload" class="secondary">Obnoviť údaje</button></div>
@@ -30,6 +31,7 @@
 <label for="customerEdit">Odberateľ na úpravu</label><select id="customerEdit" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:9px"></select>
 <div id="customerFields"></div>
 <div class="row" style="margin-top:12px"><button id="customerNew" type="button" class="secondary">Nový odberateľ</button><button id="customerSave" type="button">Uložiť odberateľa</button></div>
+<button id="customerReload" type="button" class="secondary">Obnoviť adresár</button>
 <p id="customerStatus" class="muted" aria-live="polite"></p>
 </div>
 </section><section id="admin" class="card hidden"><h2>Schvaľovanie pracovníkov</h2><div id="users"></div></section></div></section><section id="billingProfile" class="card hidden"><h2 id="billingProfileTitle">Môj profil</h2><p class="muted" id="billingProfileHint">Fakturačné údaje môžete kedykoľvek doplniť alebo upraviť.</p><div id="billingProfileFields"></div><div class="row" style="margin-top:14px"><button id="billingProfileSave">Uložiť moje údaje</button><button id="billingProfileBack" class="secondary">Späť</button></div><p id="billingProfileStatus" class="muted" aria-live="polite"></p></section><section id="detail" class="card hidden"><div class="row"><h2 style="margin:0">Detail výkazu</h2><button id="closedetail" class="secondary">Zavrieť</button></div><div id="detailbody"></div><div class="row" style="margin-top:15px"><button id="detailpdf">PDF / Tlač</button><button id="detailedit" class="secondary">Upraviť výkaz</button></div></section><section id="print" class="card hidden"></section></main>
@@ -375,7 +377,7 @@ async function openBillingProfile(target){
 }
 async function saveBillingProfile(){
  if(!user||billingProfileTarget!==user.id){$('billingProfileStatus').textContent='Údaje môže meniť iba ich vlastník.';return}
- const payload={worker_id:user.id};for(const [key] of billingFields)payload[key]=$('billing_'+key).value.trim();payload.is_vat_payer=$('billing_is_vat_payer').checked;payload.updated_at=new Date().toISOString();
+ const payload={worker_id:user.id};for(const [key] of billingFields)payload[key]=$('billing_'+key).value.trim();payload.is_vat_payer=document.getElementById('billing_is_vat_payer').checked;payload.updated_at=new Date().toISOString();
  $('billingProfileSave').disabled=true;$('billingProfileStatus').textContent='Ukladám…';
  try{const r=await db.from('worker_billing_profiles').upsert(payload,{onConflict:'worker_id'}).select('worker_id');if(r.error)throw r.error;if(!r.data?.length)throw Error('Supabase nepotvrdil uloženie.');$('billingProfileStatus').textContent='Údaje boli úspešne uložené.';toastSuccess('Fakturačný profil uložený')}catch(e){$('billingProfileStatus').textContent='Chyba ukladania: '+e.message}finally{$('billingProfileSave').disabled=false}
 }
