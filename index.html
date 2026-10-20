@@ -35,7 +35,7 @@
 <p id="customerStatus" class="muted" aria-live="polite"></p>
 </div>
 </section><section id="admin" class="card hidden"><h2>Schvaľovanie pracovníkov</h2><div id="users"></div></section></div></section><section id="workerInvoice" class="card hidden"><h2>Moja mesačná faktúra</h2><p class="muted">Faktúra sa vytvorí len za uzavretý mesiac. Hodiny a sadzba sa načítajú zo Supabase.</p><label for="invoiceMonth">Fakturačný mesiac</label><input type="month" id="invoiceMonth"><button id="invoiceRefresh" class="secondary" style="margin-top:10px">Načítať údaje</button><div id="invoiceSummary" class="entry">Vyberte mesiac.</div><label for="invoiceNumber">Číslo faktúry</label><input id="invoiceNumber" maxlength="80" placeholder="Napr. 2026-001"><button id="invoiceSubmit" style="margin-top:12px" disabled>Odoslať faktúru na schválenie</button><p id="invoiceStatus" class="muted" role="status"></p></section><section id="billingProfile" class="card hidden"><h2 id="billingProfileTitle">Môj profil</h2><p class="muted" id="billingProfileHint">Fakturačné údaje môžete kedykoľvek doplniť alebo upraviť.</p><div id="billingProfileFields"></div><div class="row" style="margin-top:14px"><button id="billingProfileSave">Uložiť moje údaje</button><button id="billingProfileBack" class="secondary">Späť</button></div><p id="billingProfileStatus" class="muted" aria-live="polite"></p></section><section id="detail" class="card hidden"><div class="row"><h2 style="margin:0">Detail výkazu</h2><button id="closedetail" class="secondary">Zavrieť</button></div><div id="detailbody"></div><div class="row" style="margin-top:15px"><button id="detailpdf">PDF / Tlač</button><button id="detailedit" class="secondary">Upraviť výkaz</button></div></section><section id="print" class="card hidden"></section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script>
+<script>window.__miniBootTimer=setTimeout(function(){var x=document.getElementById('status');if(x&&x.textContent.includes('Načítavam')){x.style.color='#b91c1c';x.textContent='Spustenie trvá príliš dlho. Pravdepodobne sa nenačítala knižnica Supabase alebo neprichádza odpoveď z autentifikácie.';}},9000);</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="document.getElementById('status').textContent='Chyba: nepodarilo sa stiahnuť knižnicu Supabase.'"></script><script>
 'use strict';
 const SUPABASE_URL='https://jmirxaqvsiabmexznmxx.supabase.co',KEY='sb_publishable_XlwNxKly9NG9dYxylSHRjg_PfprPI8v';
 const $=id=>document.getElementById(id),show=(id,on)=>$(id).classList.toggle('hidden',!on),msg=(s,bad=false)=>{$('status').textContent=s;$('status').className=bad?'error':'muted'};
@@ -53,7 +53,7 @@ function sum(){const a=hours();$('sum').textContent=`Spolu: ${a.reduce((s,d)=>s+
 function reset(){if($('week'))$('week').disabled=false;if($('reset'))$('reset').textContent='Nový výkaz';editing=null;editingWorker=null;adminSource=null;$('editorTitle').textContent='Týždenný výkaz';$('editorSource').textContent='';show('editorSource',false);show('adminCompanyWrap',false);$('adminCompany').value='';$('save').textContent='Uložiť výkaz';$('week').value=monday(new Date().toLocaleDateString('en-CA'));buildDays()}
 async function loadProfile(){const r=await db.from('profiles').select('*').eq('id',user.id).maybeSingle();if(r.error)throw r.error;profile=r.data;return profile}
 async function refresh(){
- const s=await db.auth.getUser();user=s.data.user;show('auth',!user);show('app',!!user);
+ const s=await Promise.race([db.auth.getUser(),new Promise((_,reject)=>setTimeout(()=>reject(Error('Supabase Auth neodpovedá do 8 sekúnd.')),8000))]);if(s.error)throw s.error;user=s.data.user;show('auth',!user);show('app',!!user);
  if(!user){profile=null;records=[];editing=null;editingWorker=null;adminSource=null;show('detail',false);show('editor',false);$('detailbody').replaceChildren();show('print',false);$('print').replaceChildren();msg('Prihláste sa.');return}
  await loadProfile();$('userlabel').textContent=profile?.full_name||user.email;
  const approved=profile?.approved===true||profile?.status==='approved';
@@ -539,11 +539,4 @@ async function loadWorkerInvoice(){
   for(const q of [c,r,i,a])if(q.error)throw q.error;
   const el=$('invoiceSummary');el.replaceChildren();
   const add=t=>{const p=document.createElement('p');p.textContent=t;el.append(p)};
-  if(i.data){add('Faktúra '+i.data.invoice_number+' už existuje. Stav: '+i.data.status);add('Suma: '+Number(i.data.total_amount).toFixed(2)+' '+(i.data.currency||'EUR'));return}
-  if(!c.data){add('Mesiac ešte nie je uzavretý. Najprv uzavrite mesiac v aplikácii.');return}
-  const w=Number(c.data.work_hours),t=Number(c.data.travel_hours);
-  add('Práca: '+w+' h | Cesta: '+t+' h | Spolu: '+(w+t)+' h');
-  if(w+t<=0){add('Nulový mesiac – faktúra sa nevystavuje.');return}
-  if(!r.data){add('Administrátor ešte nenastavil hodinovú sadzbu.');return}
-  const rate=Number(r.data.hourly_rate),currency=r.data.currency||'EUR';
-  add('Sadzba: '+rate
+  if(i.data){add('Faktúra '+i.data.invoice_number+' už existuje. Stav: '+i.data
