@@ -9,17 +9,17 @@
 <label for="rateWorker">Pracovník</label><select id="rateWorker" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:9px"></select>
 <label for="rateMonth">Fakturačný mesiac</label><input id="rateMonth" type="month">
 <label for="rateAmount">Hodinová sadzba (€/h)</label><input id="rateAmount" type="number" min="0" step="0.01" inputmode="decimal">
-<div class="row" style="margin-top:12px"><button id="rateSave">Uložiť sadzbu</button><button id="rateReload" class="secondary">Obnoviť údaje</button></div>
-<div id="rateInfo" class="entry muted" aria-live="polite">Vyberte pracovníka a mesiac.</div>
-<div id="rateWeeks" class="entry" aria-live="polite">Kontrola týždenných výkazov sa načíta po výbere mesiaca.</div><div class="entry" style="margin-top:18px">
+<div class="entry" style="margin-top:12px">
 <h3>Odberateľ faktúry</h3>
 <p class="muted">Odberateľa vyberá iba administrátor pre konkrétneho pracovníka a mesiac. Zmena už vystavenej faktúry nie je povolená.</p>
 <label for="customerAssign">Vybrať odberateľa</label>
 <select id="customerAssign" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:9px"></select>
-<div class="row" style="margin-top:10px"><button id="customerAssignSave" type="button">Priradiť odberateľa</button><button id="customerReload" class="secondary" type="button">Obnoviť adresár</button></div>
+
 <p id="customerAssignStatus" class="muted" aria-live="polite"></p>
 </div>
-<div class="entry" id="invoiceAssignmentsPanel">
+<div class="row" style="margin-top:12px"><button id="rateSave">Uložiť nastavenia</button><button id="rateReload" class="secondary">Obnoviť údaje</button></div>
+<div id="rateInfo" class="entry muted" aria-live="polite">Vyberte pracovníka a mesiac.</div>
+<div id="rateWeeks" class="entry" aria-live="polite">Kontrola týždenných výkazov sa načíta po výbere mesiaca.</div><div class="entry" id="invoiceAssignmentsPanel">
 <h3>Prehľad priradení a faktúr</h3>
 <p class="muted">Ktorý pracovník fakturuje ktorému odberateľovi a za aký mesiac. Kliknutím na záznam otvoríš jeho nastavenie vyššie.</p>
 <button id="assignmentRefresh" class="secondary" type="button">Obnoviť prehľad</button>
@@ -497,5 +497,26 @@ async function saveCustomerAssignment(){
  finally{btn.disabled=false}
 }
 
-async function init(){reset();$('monthPick').value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');$('monthPick').addEventListener('change',renderMonthly);$('earlyCloseBtn').onclick=earlyCloseMonth;$('finalCloseBtn').onclick=finalizeMonth;$('week').addEventListener('change',()=>{dates();sum()});$('closedetail').onclick=()=>show('detail',false);$('login').onclick=login;$('register').onclick=register;$('save').onclick=save;$('reset').onclick=()=>{reset();if(profile?.role==='admin')show('editor',false)};$('logout').onclick=async()=>{show('detail',false);show('editor',false);$('detailbody').replaceChildren();show('print',false);$('print').replaceChildren();await db.auth.signOut();await refresh()};$('tabarchive').onclick=()=>tab('archive');$('tabmine').onclick=()=>tab('mine');$('taball').onclick=()=>tab('all');$('tabusers').onclick=()=>tab('users');$('tabrates').onclick=()=>tab('rates');$('tabprofile').onclick=()=>tab('profile');$('billingProfileSave').onclick=saveBillingProfile;$('billingProfileBack').onclick=()=>tab(profile?.role==='admin'?'users':'mine');$('rateWorker').onchange=loadRateDetail;$('rateMonth').onchange=loadRateDetail;$('rateReload').onclick=loadRates;$('rateSave').onclick=saveRate;$('customerReload').onclick=loadCustomers;$('assignmentRefresh').onclick=loadAssignmentOverview;$('customerSave').onclick=saveCustomer;$('customerAssignSave').onclick=saveCustomerAssignment;$('customerNew').onclick=()=>{$('customerEdit').value='';showCustomerFields();};$('customerEdit').onchange=()=>showCustomerFields(customerRows.find(c=>c.id===$('customerEdit').value));if(!window.supabase?.createClient){show('auth',true);msg('Nepodarilo sa načítať knižnicu Supabase. Skontrolujte internetové pripojenie.',true);return}try{db=window.supabase.createClient(SUPABASE_URL,KEY);await refresh()}catch(e){show('auth',true);msg('Chyba pripojenia: '+e.message,true)}}init();
+async function saveBillingSettings(){
+ if(profile?.role!=='admin')return;
+ const worker=$('rateWorker').value,month=$('rateMonth').value,customer=$('customerAssign').value;
+ const raw=$('rateAmount').value.trim().replace(',', '.');const amount=Number(raw);
+ if(!worker||!/\d{4}-(0[1-9]|1[0-2])$/.test(month)){msg('Vyber pracovníka a mesiac.',true);return}
+ if(!/^\d+(?:\.\d{1,2})?$/.test(raw)||!Number.isFinite(amount)||amount<0){msg('Zadaj platnú hodinovú sadzbu.',true);return}
+ if(!customer){msg('Vyber odberateľa faktúry.',true);return}
+ const button=$('rateSave');button.disabled=true;
+ try{
+  const inv=await db.from('worker_invoices').select('id').eq('worker_id',worker).eq('invoice_month',month+'-01').maybeSingle();
+  if(inv.error)throw inv.error;
+  if(inv.data)throw Error('Faktúra už existuje; nastavenia tejto faktúry sú uzamknuté.');
+  const rate=await db.from('worker_invoice_rates').upsert({worker_id:worker,invoice_month:month+'-01',hourly_rate:amount,currency:'EUR'},{onConflict:'worker_id,invoice_month'}).select('id');
+  if(rate.error)throw rate.error;if(!rate.data?.length)throw Error('Sadzbu sa nepodarilo potvrdiť.');
+  const assigned=await db.from('worker_invoice_customers').upsert({worker_id:worker,invoice_month:month+'-01',customer_id:customer},{onConflict:'worker_id,invoice_month'}).select('customer_id');
+  if(assigned.error)throw Error('Sadzba bola uložená, ale priradenie odberateľa zlyhalo: '+assigned.error.message);
+  if(!assigned.data?.length)throw Error('Sadzba bola uložená, ale priradenie odberateľa nebolo potvrdené.');
+  toastSuccess('Sadzba aj odberateľ boli uložené.');
+  await loadRateDetail();await loadAssignmentOverview();
+ }catch(e){msg('Uloženie nastavení: '+e.message,true)}finally{button.disabled=false}
+}
+async function init(){reset();$('monthPick').value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');$('monthPick').addEventListener('change',renderMonthly);$('earlyCloseBtn').onclick=earlyCloseMonth;$('finalCloseBtn').onclick=finalizeMonth;$('week').addEventListener('change',()=>{dates();sum()});$('closedetail').onclick=()=>show('detail',false);$('login').onclick=login;$('register').onclick=register;$('save').onclick=save;$('reset').onclick=()=>{reset();if(profile?.role==='admin')show('editor',false)};$('logout').onclick=async()=>{show('detail',false);show('editor',false);$('detailbody').replaceChildren();show('print',false);$('print').replaceChildren();await db.auth.signOut();await refresh()};$('tabarchive').onclick=()=>tab('archive');$('tabmine').onclick=()=>tab('mine');$('taball').onclick=()=>tab('all');$('tabusers').onclick=()=>tab('users');$('tabrates').onclick=()=>tab('rates');$('tabprofile').onclick=()=>tab('profile');$('billingProfileSave').onclick=saveBillingProfile;$('billingProfileBack').onclick=()=>tab(profile?.role==='admin'?'users':'mine');$('rateWorker').onchange=loadRateDetail;$('rateMonth').onchange=loadRateDetail;$('rateReload').onclick=async()=>{await loadRates();await loadCustomers();};$('rateSave').onclick=saveBillingSettings;$('customerReload').onclick=loadCustomers;$('assignmentRefresh').onclick=loadAssignmentOverview;$('customerSave').onclick=saveCustomer;$('customerNew').onclick=()=>{$('customerEdit').value='';showCustomerFields();};$('customerEdit').onchange=()=>showCustomerFields(customerRows.find(c=>c.id===$('customerEdit').value));if(!window.supabase?.createClient){show('auth',true);msg('Nepodarilo sa načítať knižnicu Supabase. Skontrolujte internetové pripojenie.',true);return}try{db=window.supabase.createClient(SUPABASE_URL,KEY);await refresh()}catch(e){show('auth',true);msg('Chyba pripojenia: '+e.message,true)}}init();
 </script></body></html>
