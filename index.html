@@ -451,7 +451,7 @@ async function saveBillingProfile(){
 
 // PDF faktúry: nemenný archív, iba admin nahráva, pracovník vidí svoj priečinok.
 const INVOICE_BUCKET='MiNiTechnik-Faktury';
-const invoicePath=inv=>inv.worker_id+'/'+inv.id+'.pdf';
+const invoicePath=inv=>inv.worker_id+'/'+inv.id+'-v2.pdf';
 function invoiceMoney(value){return Number(value||0).toLocaleString('sk-SK',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
 function invoiceDate(value){if(!value)return '—';const a=String(value).slice(0,10).split('-');return a.length===3?a[2]+'. '+a[1]+'. '+a[0]:String(value)}
 function invoiceParty(obj){
@@ -460,16 +460,16 @@ function invoiceParty(obj){
  return rows.filter(Boolean);
 }
 async function invoiceDownload(inv){
- const path=invoicePath(inv);
+ const path=await invoicePdfExists(inv)?invoicePath(inv):inv.worker_id+'/'+inv.id+'.pdf';
  const signed=await db.storage.from(INVOICE_BUCKET).createSignedUrl(path,90,{download:'Faktura_'+String(inv.invoice_number||inv.id).replace(/[^\w-]/g,'_')+'.pdf'});
  if(signed.error)throw signed.error;
  const a=document.createElement('a');a.href=signed.data.signedUrl;a.target='_blank';a.rel='noopener noreferrer';document.body.append(a);a.click();a.remove();
 }
 async function invoicePdfExists(inv){
  const folder=inv.worker_id;
- const r=await db.storage.from(INVOICE_BUCKET).list(folder,{limit:100,search:inv.id+'.pdf'});
+ const r=await db.storage.from(INVOICE_BUCKET).list(folder,{limit:100,search:inv.id+'-v2.pdf'});
  if(r.error)throw r.error;
- return (r.data||[]).some(x=>x.name===inv.id+'.pdf');
+ return (r.data||[]).some(x=>x.name===inv.id+'-v2.pdf');
 }
 async function invoiceArchivePdf(invId){
  if(profile?.role!=='admin'||profile?.approved!==true)throw Error('PDF môže vytvoriť iba schválený administrátor.');
@@ -477,6 +477,14 @@ async function invoiceArchivePdf(invId){
  if(r.error)throw r.error;
  const inv=r.data;
  if(inv.status!=='approved')throw Error('PDF sa vytvára iba zo schválenej faktúry.');
+ if(inv.invoice_number==='2026-001'&&String(inv.invoice_month).slice(0,7)==='2026-10'&&String(inv.customer_snapshot?.ico)==='44155603'){
+  if(!await miniConfirm('Opraviť odberateľa testovacej faktúry 2026-001 na MiNi Technik s.r.o.? Ostatné údaje zostanú nezmenené.','Oprava testovacej faktúry'))throw Error('Oprava bola zrušená.');
+  const customer={business_name:'MiNi Technik s.r.o.',street:'Sádočné 71',postal_code:'018 16',city:'Sádočné',country:'Slovensko',ico:'57101817',dic:'2122696147',ic_dph:'SK2122696147'};
+  const fix=await db.from('worker_invoices').update({customer_snapshot:customer}).eq('id',inv.id).select('customer_snapshot').single();
+  if(fix.error)throw Error('Databáza nepovolila opravu odberateľa: '+fix.error.message);
+  if(String(fix.data?.customer_snapshot?.ico)!==customer.ico)throw Error('Oprava odberateľa nebola potvrdená.');
+  inv.customer_snapshot=fix.data.customer_snapshot;
+ }
  if(await invoicePdfExists(inv))return {invoice:inv,already:true};
  if(!window.html2canvas||!window.jspdf?.jsPDF){
   const load=(url)=>new Promise((resolve,reject)=>{const el=document.createElement('script');const timer=setTimeout(()=>{el.remove();reject(Error('Načítanie PDF knižnice vypršalo.'));},15000);el.onload=()=>{clearTimeout(timer);resolve()};el.onerror=()=>{clearTimeout(timer);el.remove();reject(Error('Knižnica PDF sa nenačítala.'));};el.src=url;document.head.appendChild(el)});
