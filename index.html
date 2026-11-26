@@ -451,7 +451,7 @@ async function saveBillingProfile(){
 
 // PDF faktúry: nemenný archív, iba admin nahráva, pracovník vidí svoj priečinok.
 const INVOICE_BUCKET='MiNiTechnik-Faktury';
-const invoicePath=inv=>inv.worker_id+'/'+inv.id+'-v2.pdf';
+const invoicePath=inv=>inv.worker_id+'/'+inv.id+'-v3.pdf';
 function invoiceMoney(value){return Number(value||0).toLocaleString('sk-SK',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'}
 function invoiceDate(value){if(!value)return '—';const a=String(value).slice(0,10).split('-');return a.length===3?a[2]+'. '+a[1]+'. '+a[0]:String(value)}
 function invoiceParty(obj){
@@ -467,9 +467,9 @@ async function invoiceDownload(inv){
 }
 async function invoicePdfExists(inv){
  const folder=inv.worker_id;
- const r=await db.storage.from(INVOICE_BUCKET).list(folder,{limit:100,search:inv.id+'-v2.pdf'});
+ const r=await db.storage.from(INVOICE_BUCKET).list(folder,{limit:100,search:inv.id+'-v3.pdf'});
  if(r.error)throw r.error;
- return (r.data||[]).some(x=>x.name===inv.id+'-v2.pdf');
+ return (r.data||[]).some(x=>x.name===inv.id+'-v3.pdf');
 }
 async function invoiceArchivePdf(invId){
  if(profile?.role!=='admin'||profile?.approved!==true)throw Error('PDF môže vytvoriť iba schválený administrátor.');
@@ -494,22 +494,27 @@ async function invoiceArchivePdf(invId){
  const supplier=invoiceParty(inv.supplier_snapshot),customer=invoiceParty(inv.customer_snapshot);
  if(!supplier.length||!customer.length)throw Error('Faktúra nemá uložené údaje dodávateľa alebo odberateľa. PDF nebolo vytvorené.');
  const wrap=document.createElement('div');
- Object.assign(wrap.style,{position:'fixed',left:'-12000px',top:'0',width:'794px',padding:'48px',background:'#fff',color:'#171717',fontFamily:'Arial, sans-serif',fontSize:'15px',lineHeight:'1.5',boxSizing:'border-box'});
+ Object.assign(wrap.style,{position:'fixed',left:'-12000px',top:'0',width:'794px',padding:'8px 12px',background:'#fff',color:'#000',fontFamily:'Arial, sans-serif',fontSize:'12px',lineHeight:'1.35',boxSizing:'border-box'});
  const el=(tag,txt,style)=>{const n=document.createElement(tag);if(txt!=null)n.textContent=txt;if(style)n.style.cssText=style;return n};
- const grid=el('div',null,'display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;font-size:13px;line-height:1.5');
- const left=el('div',null,'border-right:1px solid #333');const right=el('div');grid.append(left,right);
- for(const [label,lines] of [['Dodávateľ:',supplier],['Odberateľ:',customer]]){const block=el('div',null,'padding:12px;min-height:150px;border-bottom:1px solid #777');block.append(el('b',label,'text-decoration:underline'),...lines.map(x=>el('div',x)));left.append(block)}
- right.append(el('div','FAKTÚRA č. '+inv.invoice_number,'font-size:22px;font-weight:bold;padding:12px;border-bottom:1px solid #333'));
- const fields=[['Dátum vystavenia',invoiceDate(inv.issue_date)],['Fakturované obdobie',String(inv.invoice_month||'').slice(0,7)],['Dátum splatnosti',invoiceDate(inv.due_date)],['Forma úhrady','Prevodný príkaz'],['IBAN',inv.supplier_snapshot?.iban||'—'],['SWIFT/BIC',inv.supplier_snapshot?.swift_bic||'—'],['Variabilný symbol',String(inv.invoice_number||'').replace(/\D/g,'')],['Suma k úhrade',invoiceMoney(inv.total_amount)]];
- if(inv.delivery_date)fields.splice(1,0,['Dátum dodania',invoiceDate(inv.delivery_date)]);
- for(const [label,value] of fields){const row=el('div',null,'padding:7px 10px;border-bottom:1px solid #aaa;overflow-wrap:anywhere');row.append(el('div',label,'font-size:11px'),el('b',value));right.append(row)}wrap.append(grid);
- wrap.append(el('h3','Fakturujeme Vám za:','font-size:15px;margin:24px 0 8px'));
- const table=el('table',null,'border-collapse:collapse;width:100%;font-size:13px');
- const addRow=(values,header=false)=>{const tr=el('tr');values.forEach((v,i)=>tr.append(el(header?'th':'td',v,'border:1px solid #555;padding:9px 6px;text-align:'+(i===1?'left':'right')+(header?';background:#eee':''))));table.append(tr)};
- addRow(['P. č.','Popis','Množstvo','MJ','Cena za MJ','Spolu'],true);
- [['Montážne práce',inv.work_hours],['Cestovné hodiny',inv.travel_hours]].forEach(([label,hours],i)=>addRow([String(i+1),label,String(Number(hours||0)),'hod',invoiceMoney(inv.hourly_rate),invoiceMoney(Number(hours||0)*Number(inv.hourly_rate||0))]));wrap.append(table);
- const total=el('div',null,'display:flex;justify-content:space-between;align-items:center;border:2px solid #333;padding:10px;margin:10px 0 0 25%;font-weight:bold');total.append(el('span','Celková fakturovaná suma: EUR'),el('span',invoiceMoney(inv.total_amount),'font-size:23px'));wrap.append(total);
- wrap.append(el('div','Podpis a pečiatka dodávateľa:','margin:100px 0 35px 55%;border-top:1px solid #777;padding-top:8px;font-size:12px;text-align:center'));
+ const grid=el('div',null,'display:grid;grid-template-columns:1fr 1fr;border:1px solid #000;min-height:460px');
+ const left=el('div',null,'border-right:1px solid #000;display:flex;flex-direction:column;padding:15px 8px');const right=el('div',null,'display:flex;flex-direction:column');grid.append(left,right);
+ for(const [label,lines] of [['Dodávateľ:',supplier],['Odberateľ:',customer]]){const block=el('div',null,'min-height:205px');block.append(el('b',label,'text-decoration:underline;font-size:12px'),...lines.map((x,i)=>el('div',x,'margin-left:12px;'+(i===0?'font-weight:bold;':''))));left.append(block)}
+ const heading=el('div',null,'display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #000;padding:9px 5px 2px;font-weight:bold;font-size:15px');heading.append(el('span','Faktúra číslo :'),el('span',inv.invoice_number,'font-size:19px'));right.append(heading);
+ right.append(el('div','Fakturované obdobie: '+String(inv.invoice_month||'').slice(0,7),'border-bottom:1px solid #000;padding:2px 5px;font-size:10px'));
+ const address=el('div',null,'height:220px;border-bottom:1px solid #000;padding:5px');address.append(el('b','Poštová adresa:','text-decoration:underline'));const postal=el('div',null,'margin:42px 0 0 48px;font-size:14px');customer.filter(x=>! /^(IČO|DIČ|IČ DPH):/.test(x)).forEach((x,i)=>postal.append(el('div',x,i===0?'font-weight:bold':'')));address.append(postal);right.append(address);
+ const dates=el('div',null,'display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #000');
+ [['Dátum vyhotovenia',invoiceDate(inv.issue_date)],['Dátum dodania',invoiceDate(inv.issue_date)],['Dátum splatnosti',invoiceDate(inv.due_date)]].forEach(([k,v],i)=>{const c=el('div',null,'text-align:center;'+(i<2?'border-right:1px solid #000;':''));c.append(el('div',k,'font-size:9px;padding:4px 1px;border-bottom:1px solid #000'),el('div',v,'padding:5px 1px;'+(i===2?'font-weight:bold':'')));dates.append(c)});right.append(dates);
+ for(const [k,v] of [['Forma úhrady','Prevodný príkaz'],['IBAN',inv.supplier_snapshot?.iban||'—'],['SWIFT/BIC',inv.supplier_snapshot?.swift_bic||'—'],['Suma k úhrade',invoiceMoney(inv.total_amount)],['Variabilný symbol',String(inv.invoice_number||'').replace(/\D/g,'')]]){const row=el('div',null,'border-bottom:1px solid #000;text-align:center;padding:4px 3px;font-size:11px;overflow-wrap:anywhere');row.append(el('span',k+': '),el('b',v));right.append(row)}
+ wrap.append(grid,el('h3','Fakturujeme Vám za:','font-size:13px;margin:13px 0 4px'));
+ const table=el('table',null,'border-collapse:collapse;width:100%;font-size:11px;table-layout:fixed');
+ const widths=['5%','53%','11%','6%','12%','13%'];
+ const addRow=(values,header=false)=>{const tr=el('tr');values.forEach((v,i)=>tr.append(el(header?'th':'td',v,'width:'+widths[i]+';border:1px solid #000;padding:'+(header?'9px 3px':'3px')+';text-align:'+(header?'center':i===1?'left':i===0||i===3?'center':'right')+';font-weight:normal')));table.append(tr)};
+ const num=v=>Number(v||0).toLocaleString('sk-SK',{minimumFractionDigits:2,maximumFractionDigits:2});
+ addRow(['P. č.','Popis','Množstvo','MJ','Cena za j.','Spolu'],true);
+ [['Montážne práce',inv.work_hours],['Cestovné hodiny',inv.travel_hours]].forEach(([label,hours],i)=>addRow([String(i+1),label,num(hours),'hod',num(inv.hourly_rate),num(Number(hours||0)*Number(inv.hourly_rate||0))]));wrap.append(table);
+ const total=el('div',null,'display:flex;justify-content:space-between;align-items:center;border:2px solid #000;padding:3px 7px;margin:3px 0 0 43%;font-weight:bold;font-size:12px');total.append(el('span','Celková fakturovaná suma: EUR'),el('span',num(inv.total_amount),'font-size:18px'));wrap.append(total);
+ if(inv.supplier_snapshot?.is_vat_payer===false)wrap.append(el('div','Dodávateľ nie je platiteľom DPH.','margin-top:12px;font-size:12px'));
+ wrap.append(el('div','Podpis a pečiatka :','margin:120px 0 40px 54%;font-weight:bold;font-size:11px'));
  document.body.append(wrap);
  try{
   const canvas=await window.html2canvas(wrap,{scale:2,backgroundColor:'#ffffff',useCORS:false,logging:false});
