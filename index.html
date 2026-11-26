@@ -463,7 +463,7 @@ async function invoiceDownload(inv){
  const path=await invoicePdfExists(inv)?invoicePath(inv):inv.worker_id+'/'+inv.id+'.pdf';
  const signed=await db.storage.from(INVOICE_BUCKET).createSignedUrl(path,90,{download:'Faktura_'+String(inv.invoice_number||inv.id).replace(/[^\w-]/g,'_')+'.pdf'});
  if(signed.error)throw signed.error;
- const a=document.createElement('a');a.href=signed.data.signedUrl;a.target='_blank';a.rel='noopener noreferrer';document.body.append(a);a.click();a.remove();
+ const a=document.createElement('a');a.href=signed.data.signedUrl;a.download='Faktura_'+String(inv.invoice_number||inv.id).replace(/[^\w-]/g,'_')+'.pdf';document.body.append(a);a.click();a.remove();
 }
 async function invoicePdfExists(inv){
  const folder=inv.worker_id;
@@ -528,7 +528,7 @@ async function invoicePdfButton(inv,admin){
  btn.onclick=async()=>{btn.disabled=true;const old=btn.textContent;btn.textContent='Pracujem s PDF…';try{
   if(admin){const result=await invoiceArchivePdf(inv.id);if(!result.already)toastSuccess('PDF bolo uložené do archívu.');await invoiceDownload(result.invoice)}
   else await invoiceDownload(inv);
- }catch(e){msg('PDF faktúry: '+e.message,true)}finally{btn.disabled=false;btn.textContent=old}};
+ }catch(e){const message='PDF faktúry: '+(e?.message||String(e));msg(message,true);window.alert(message)}finally{btn.disabled=false;btn.textContent=old}};
  return btn;
 }
 
